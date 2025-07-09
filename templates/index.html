@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RC Car Control</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #4a6fa5;
+            --secondary: #166088;
+            --accent: #4fc3f7;
+            --dark: #0a1128;
+            --light: #f8f9fa;
+            --danger: #e63946;
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: var(--dark);
+            color: var(--light);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            background-image: radial-gradient(circle at center, var(--dark) 0%, #000 100%);
+        }
+        
+        h1 {
+            font-family: 'Orbitron', sans-serif;
+            color: var(--accent);
+            text-shadow: 0 0 10px rgba(79, 195, 247, 0.5);
+            margin-bottom: 20px;
+            letter-spacing: 2px;
+        }
+        
+        .video-container {
+            position: relative;
+            width: 640px;
+            height: 480px;
+            margin-bottom: 30px;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 0 20px rgba(79, 195, 247, 0.3);
+            border: 2px solid var(--secondary);
+        }
+        
+        .video-container::before {
+            content: 'LIVE FEED';
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background-color: var(--danger);
+            color: white;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+            z-index: 2;
+        }
+        
+        .video-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .control-panel {
+            background: rgba(10, 17, 40, 0.8);
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(79, 195, 247, 0.2);
+        }
+        
+        .d-pad {
+            display: grid;
+            grid-template-areas:
+                ". up ."
+                "left stop right"
+                ". down .";
+            gap: 10px;
+            justify-items: center;
+        }
+        
+        button {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            border: none;
+            background-color: var(--secondary);
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        
+        button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+        }
+        
+        button:active {
+            transform: translateY(1px);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        
+        #forward {
+            grid-area: up;
+            background-color: var(--primary);
+        }
+        
+        #left {
+            grid-area: left;
+        }
+        
+        #stop {
+            grid-area: stop;
+            background-color: var(--danger);
+            width: 100px;
+            height: 100px;
+            font-size: 32px;
+        }
+        
+        #right {
+            grid-area: right;
+        }
+        
+        #backward {
+            grid-area: down;
+            background-color: var(--primary);
+        }
+        
+        .status {
+            margin-top: 20px;
+            text-align: center;
+            font-size: 14px;
+            color: var(--accent);
+            height: 20px;
+        }
+        
+        .connection-status {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            display: flex;
+            align-items: center;
+            background-color: rgba(0, 0, 0, 0.7);
+            padding: 8px 12px;
+            border-radius: 20px;
+            font-size: 14px;
+        }
+        
+        .connection-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background-color: #4CAF50;
+            margin-right: 8px;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+        
+        @media (max-width: 768px) {
+            .video-container {
+                width: 100%;
+                height: auto;
+                max-height: 50vh;
+            }
+            
+            button {
+                width: 60px;
+                height: 60px;
+                font-size: 20px;
+            }
+            
+            #stop {
+                width: 80px;
+                height: 80px;
+                font-size: 28px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>RC CAR CONTROL PANEL</h1>
+    
+    <div class="video-container">
+        <img src="{{ url_for('video_feed') }}" alt="RC Car Camera Feed">
+    </div>
+    
+    <div class="control-panel">
+        <div class="d-pad">
+            <button id="forward" onclick="send('forward')">⬆️</button>
+            <button id="left" onclick="send('left')">⬅️</button>
+            <button id="stop" onclick="send('stop')">⏹️</button>
+            <button id="right" onclick="send('right')">➡️</button>
+            <button id="backward" onclick="send('backward')">⬇️</button>
+        </div>
+        <div class="status" id="status">Ready</div>
+    </div>
+    
+    <div class="connection-status">
+        <div class="connection-dot"></div>
+        <span>Connected</span>
+    </div>
+    
+    <script>
+        let lastDirection = '';
+        const statusElement = document.getElementById('status');
+        
+        function send(dir) {
+            fetch('/move?dir=' + dir)
+                .then(response => {
+                    if (response.ok) {
+                        updateStatus(dir);
+                        lastDirection = dir;
+                    }
+                })
+                .catch(error => {
+                    statusElement.textContent = 'Error: Connection failed';
+                    statusElement.style.color = 'var(--danger)';
+                });
+        }
+        
+        function updateStatus(dir) {
+            const directions = {
+                'forward': 'Moving Forward',
+                'backward': 'Moving Backward',
+                'left': 'Turning Left',
+                'right': 'Turning Right',
+                'stop': 'Stopped'
+            };
+            
+            statusElement.textContent = directions[dir];
+            statusElement.style.color = dir === 'stop' ? 'var(--danger)' : 'var(--accent)';
+        }
+        
+        // Keyboard controls
+        document.addEventListener('keydown', (e) => {
+            const keyActions = {
+                'ArrowUp': 'forward',
+                'ArrowDown': 'backward',
+                'ArrowLeft': 'left',
+                'ArrowRight': 'right',
+                ' ': 'stop'
+            };
+            
+            if (keyActions[e.key] && keyActions[e.key] !== lastDirection) {
+                send(keyActions[e.key]);
+                const buttonId = keyActions[e.key];
+                const button = document.getElementById(buttonId);
+                if (button) {
+                    button.classList.add('active');
+                    setTimeout(() => button.classList.remove('active'), 200);
+                }
+            }
+        });
+        
+        // Add touch support for mobile
+        document.querySelectorAll('button').forEach(button => {
+            button.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                button.click();
+                button.classList.add('active');
+            });
+            
+            button.addEventListener('touchend', (e) => {
+                e.preventDefault();
+                button.classList.remove('active');
+            });
+        });
+    </script>
+</body>
+</html>
