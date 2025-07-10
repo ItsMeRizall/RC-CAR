@@ -4,7 +4,7 @@ try:
     import RPi.GPIO as GPIO
     IS_PI = True
 except ImportError:
-    # Mode simulasi di Windows
+    # Simulasi di Windows
     IS_PI = False
     class GPIO:
         BCM = "BCM"
@@ -23,84 +23,87 @@ except ImportError:
 # Mode GPIO
 GPIO.setmode(GPIO.BCM)
 
-# Pin koneksi ke driver motor
-# Motor Belakang
-KIRI_B_IN1 = 4
-KIRI_B_IN2 = 17
-KANAN_B_IN1 = 27
-KANAN_B_IN2 = 22
+# Mapping motor (sesuai gambar wiring)
+KANAN_ATAS_IN1 = 23
+KANAN_ATAS_IN2 = 24
 
-# Motor DEPAN
-KIRI_D_IN1 = 0
-KIRI_D_IN2 = 5
-KANAN_D_IN1 = 6
-KANAN_D_IN2 = 13
+KIRI_ATAS_IN1 = 5
+KIRI_ATAS_IN2 = 6
 
-# Setup pin
-GPIO.setup(KIRI_B_IN1, GPIO.OUT)
-GPIO.setup(KIRI_B_IN2, GPIO.OUT)
-GPIO.setup(KANAN_B_IN1, GPIO.OUT)
-GPIO.setup(KANAN_B_IN2, GPIO.OUT)
+KANAN_BAWAH_IN1 = 17
+KANAN_BAWAH_IN2 = 27
 
-GPIO.setup(KIRI_D_IN1, GPIO.OUT)
-GPIO.setup(KIRI_D_IN2, GPIO.OUT)
-GPIO.setup(KANAN_D_IN1, GPIO.OUT)
-GPIO.setup(KANAN_D_IN2, GPIO.OUT)
+KIRI_BAWAH_IN1 = 22
+KIRI_BAWAH_IN2 = 4
+
+# Setup GPIO
+all_pins = [KANAN_ATAS_IN1, KANAN_ATAS_IN2,
+            KIRI_ATAS_IN1, KIRI_ATAS_IN2,
+            KANAN_BAWAH_IN1, KANAN_BAWAH_IN2,
+            KIRI_BAWAH_IN1, KIRI_BAWAH_IN2]
+
+for pin in all_pins:
+    GPIO.setup(pin, GPIO.OUT)
 
 def stop():
-    GPIO.output(KIRI_B_IN1, GPIO.LOW)
-    GPIO.output(KIRI_B_IN2, GPIO.LOW)
-    GPIO.output(KANAN_B_IN1, GPIO.LOW)
-    GPIO.output(KANAN_B_IN2, GPIO.LOW)
-
-    GPIO.output(KIRI_D_IN1, GPIO.LOW)
-    GPIO.output(KIRI_D_IN2, GPIO.LOW)
-    GPIO.output(KANAN_D_IN1, GPIO.LOW)
-    GPIO.output(KANAN_D_IN2, GPIO.LOW)
+    for pin in all_pins:
+        GPIO.output(pin, GPIO.LOW)
 
 def forward():
-    GPIO.output(KIRI_B_IN1, GPIO.HIGH)
-    GPIO.output(KIRI_B_IN2, GPIO.LOW)
-    GPIO.output(KANAN_B_IN1, GPIO.HIGH)
-    GPIO.output(KANAN_B_IN2, GPIO.LOW)
+    # Semua motor berputar ke arah maju
+    GPIO.output(KANAN_ATAS_IN1, GPIO.HIGH)
+    GPIO.output(KANAN_ATAS_IN2, GPIO.LOW)
 
-    GPIO.output(KIRI_D_IN1, GPIO.HIGH)
-    GPIO.output(KIRI_D_IN2, GPIO.LOW)
-    GPIO.output(KANAN_D_IN1, GPIO.HIGH)
-    GPIO.output(KANAN_D_IN2, GPIO.LOW)
+    GPIO.output(KIRI_ATAS_IN1, GPIO.HIGH)
+    GPIO.output(KIRI_ATAS_IN2, GPIO.LOW)
+
+    GPIO.output(KANAN_BAWAH_IN1, GPIO.HIGH)
+    GPIO.output(KANAN_BAWAH_IN2, GPIO.LOW)
+
+    GPIO.output(KIRI_BAWAH_IN1, GPIO.HIGH)
+    GPIO.output(KIRI_BAWAH_IN2, GPIO.LOW)
 
 def backward():
-    GPIO.output(KIRI_B_IN1, GPIO.LOW)
-    GPIO.output(KIRI_B_IN2, GPIO.HIGH)
-    GPIO.output(KANAN_B_IN1, GPIO.LOW)
-    GPIO.output(KANAN_B_IN2, GPIO.HIGH)
+    # Semua motor berputar mundur
+    GPIO.output(KANAN_ATAS_IN1, GPIO.LOW)
+    GPIO.output(KANAN_ATAS_IN2, GPIO.HIGH)
 
-    GPIO.output(KIRI_D_IN1, GPIO.LOW)
-    GPIO.output(KIRI_D_IN2, GPIO.HIGH)
-    GPIO.output(KANAN_D_IN1, GPIO.LOW)
-    GPIO.output(KANAN_D_IN2, GPIO.HIGH)
+    GPIO.output(KIRI_ATAS_IN1, GPIO.LOW)
+    GPIO.output(KIRI_ATAS_IN2, GPIO.HIGH)
+
+    GPIO.output(KANAN_BAWAH_IN1, GPIO.LOW)
+    GPIO.output(KANAN_BAWAH_IN2, GPIO.HIGH)
+
+    GPIO.output(KIRI_BAWAH_IN1, GPIO.LOW)
+    GPIO.output(KIRI_BAWAH_IN2, GPIO.HIGH)
 
 def left():
-    GPIO.output(KIRI_B_IN1, GPIO.LOW)
-    GPIO.output(KIRI_B_IN2, GPIO.HIGH)
-    GPIO.output(KANAN_B_IN1, GPIO.HIGH)
-    GPIO.output(KANAN_B_IN2, GPIO.LOW)
+    # Belok kiri: kiri motor mundur, kanan motor maju
+    GPIO.output(KANAN_ATAS_IN1, GPIO.HIGH)
+    GPIO.output(KANAN_ATAS_IN2, GPIO.LOW)
 
-    GPIO.output(KIRI_D_IN1, GPIO.LOW)
-    GPIO.output(KIRI_D_IN2, GPIO.HIGH)
-    GPIO.output(KANAN_D_IN1, GPIO.HIGH)
-    GPIO.output(KANAN_D_IN2, GPIO.LOW)
+    GPIO.output(KIRI_ATAS_IN1, GPIO.LOW)
+    GPIO.output(KIRI_ATAS_IN2, GPIO.HIGH)
+
+    GPIO.output(KANAN_BAWAH_IN1, GPIO.HIGH)
+    GPIO.output(KANAN_BAWAH_IN2, GPIO.LOW)
+
+    GPIO.output(KIRI_BAWAH_IN1, GPIO.LOW)
+    GPIO.output(KIRI_BAWAH_IN2, GPIO.HIGH)
 
 def right():
-    GPIO.output(KIRI_B_IN1, GPIO.HIGH)
-    GPIO.output(KIRI_B_IN2, GPIO.LOW)
-    GPIO.output(KANAN_B_IN1, GPIO.LOW)
-    GPIO.output(KANAN_B_IN2, GPIO.HIGH)
+    # Belok kanan: kanan motor mundur, kiri motor maju
+    GPIO.output(KANAN_ATAS_IN1, GPIO.LOW)
+    GPIO.output(KANAN_ATAS_IN2, GPIO.HIGH)
 
-    GPIO.output(KIRI_D_IN1, GPIO.HIGH)
-    GPIO.output(KIRI_D_IN2, GPIO.LOW)
-    GPIO.output(KANAN_D_IN1, GPIO.LOW)
-    GPIO.output(KANAN_D_IN2, GPIO.HIGH)
+    GPIO.output(KIRI_ATAS_IN1, GPIO.HIGH)
+    GPIO.output(KIRI_ATAS_IN2, GPIO.LOW)
+
+    GPIO.output(KANAN_BAWAH_IN1, GPIO.LOW)
+    GPIO.output(KANAN_BAWAH_IN2, GPIO.HIGH)
+
+    GPIO.output(KIRI_BAWAH_IN1, GPIO.HIGH)
+    GPIO.output(KIRI_BAWAH_IN2, GPIO.LOW)
 
 def cleanup():
     GPIO.cleanup()
