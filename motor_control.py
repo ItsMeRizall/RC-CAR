@@ -27,8 +27,8 @@ GPIO.setmode(GPIO.BCM)
 KANAN_ATAS_IN1 = 5
 KANAN_ATAS_IN2 = 6
 
-KIRI_ATAS_IN1 = 13
-KIRI_ATAS_IN2 = 26
+KIRI_ATAS_IN1 = 26
+KIRI_ATAS_IN2 = 13
 
 KANAN_BAWAH_IN1 = 27
 KANAN_BAWAH_IN2 = 22
@@ -50,49 +50,60 @@ def stop():
         GPIO.output(pin, GPIO.LOW)
 
 def forward():
-    # Semua motor berputar ke arah maju
+    """
+    🔁 Sebenarnya ini adalah arah MAJU
+    Semua roda berputar ke depan.
+    """
     GPIO.output(KANAN_ATAS_IN1, GPIO.HIGH)
     GPIO.output(KANAN_ATAS_IN2, GPIO.LOW)
 
-    GPIO.output(KIRI_ATAS_IN1, GPIO.HIGH)
-    GPIO.output(KIRI_ATAS_IN2, GPIO.LOW)
+    GPIO.output(KIRI_ATAS_IN1, GPIO.LOW)  # Koreksi: seharusnya ini mundur agar arah seimbang
+    GPIO.output(KIRI_ATAS_IN2, GPIO.HIGH)
 
     GPIO.output(KANAN_BAWAH_IN1, GPIO.HIGH)
     GPIO.output(KANAN_BAWAH_IN2, GPIO.LOW)
-
-    GPIO.output(KIRI_BAWAH_IN1, GPIO.HIGH)
-    GPIO.output(KIRI_BAWAH_IN2, GPIO.LOW)
-
-def backward():
-    # Semua motor berputar mundur
-    GPIO.output(KANAN_ATAS_IN1, GPIO.LOW)
-    GPIO.output(KANAN_ATAS_IN2, GPIO.HIGH)
-
-    GPIO.output(KIRI_ATAS_IN1, GPIO.LOW)
-    GPIO.output(KIRI_ATAS_IN2, GPIO.HIGH)
-
-    GPIO.output(KANAN_BAWAH_IN1, GPIO.LOW)
-    GPIO.output(KANAN_BAWAH_IN2, GPIO.HIGH)
 
     GPIO.output(KIRI_BAWAH_IN1, GPIO.LOW)
     GPIO.output(KIRI_BAWAH_IN2, GPIO.HIGH)
 
 def left():
-    # Belok kiri: kiri motor mundur, kanan motor maju
+    """
+    🔄 Ini seharusnya semua roda MAJU — jadi kita tukar dengan 'forward'
+    """
     GPIO.output(KANAN_ATAS_IN1, GPIO.HIGH)
     GPIO.output(KANAN_ATAS_IN2, GPIO.LOW)
 
-    GPIO.output(KIRI_ATAS_IN1, GPIO.LOW)
-    GPIO.output(KIRI_ATAS_IN2, GPIO.HIGH)
+    GPIO.output(KIRI_ATAS_IN1, GPIO.HIGH)
+    GPIO.output(KIRI_ATAS_IN2, GPIO.LOW)
 
     GPIO.output(KANAN_BAWAH_IN1, GPIO.HIGH)
     GPIO.output(KANAN_BAWAH_IN2, GPIO.LOW)
 
-    GPIO.output(KIRI_BAWAH_IN1, GPIO.LOW)
-    GPIO.output(KIRI_BAWAH_IN2, GPIO.HIGH)
+    GPIO.output(KIRI_BAWAH_IN1, GPIO.HIGH)
+    GPIO.output(KIRI_BAWAH_IN2, GPIO.LOW)
 
 def right():
-    # Belok kanan: kanan motor mundur, kiri motor maju
+    """
+    ⬅️ Ini sebenarnya backward (mundur)
+    Tapi motor kiri atas tidak jalan → perlu arah maju
+    """
+    GPIO.output(KANAN_ATAS_IN1, GPIO.LOW)
+    GPIO.output(KANAN_ATAS_IN2, GPIO.HIGH)
+
+    GPIO.output(KIRI_ATAS_IN1, GPIO.HIGH)  # Koreksi arah supaya jalan
+    GPIO.output(KIRI_ATAS_IN2, GPIO.LOW)
+
+    GPIO.output(KANAN_BAWAH_IN1, GPIO.LOW)
+    GPIO.output(KANAN_BAWAH_IN2, GPIO.HIGH)
+
+    GPIO.output(KIRI_BAWAH_IN1, GPIO.HIGH)
+    GPIO.output(KIRI_BAWAH_IN2, GPIO.LOW)
+
+def backward():
+    """
+    🔁 Ini sebenarnya belok kanan (roda kiri maju, kanan mundur)
+    Jadi ini kita ganti jadi fungsi 'right'
+    """
     GPIO.output(KANAN_ATAS_IN1, GPIO.LOW)
     GPIO.output(KANAN_ATAS_IN2, GPIO.HIGH)
 
@@ -104,6 +115,5 @@ def right():
 
     GPIO.output(KIRI_BAWAH_IN1, GPIO.HIGH)
     GPIO.output(KIRI_BAWAH_IN2, GPIO.LOW)
-
 def cleanup():
     GPIO.cleanup()
