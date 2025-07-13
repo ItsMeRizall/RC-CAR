@@ -21,6 +21,7 @@ for idx, name in enumerate(class_names):
 # Tambahan: tampilkan dict model.names mentah
 print("\n[DEBUG] model.names dict:", model.names)
 
+mode = 'manual'  # default mode
 # Target class berbasis nama
 target_name = 'cat'  # default
 last_action_time = 0
@@ -28,6 +29,13 @@ last_action_time = 0
 @app.route('/')
 def index():
     return render_template('index.html')
+
+@app.route('/set_mode')
+def set_mode():
+    global mode
+    mode = request.args.get('mode')
+    print(f"\n[MODE SET] New mode: {mode}")
+    return ('', 204)
 
 @app.route('/set_target_name')
 def set_target_name():
@@ -48,7 +56,6 @@ def gen_frames():
             break
 
         print(f"\n--- Frame {frame_count} ---")
-
         results = model(frame, conf=0.5)
         detections = sv.Detections.from_ultralytics(results[0])
         tracks = tracker.update_with_detections(detections)
@@ -86,8 +93,6 @@ def gen_frames():
                     print(f"[ERROR] While parsing track: {e}")
                     continue
 
-
-
         if not followed:
             motor.stop()
             print("[WARNING] No target match. Motor stopped.")
@@ -110,9 +115,22 @@ def gen_frames():
 
                 last_action_time = now
 
-        # Visualisasi hasil
+            # Visualisasi hasil
         annotated = results[0].plot()
         _, buffer = cv2.imencode('.jpg', annotated)
+        frame_bytes = buffer.tobytes()
+
+        yield (b'--frame\r\n'
+            b'Content-Type: image/jpeg\r\n\r\n' + frame_bytes + b'\r\n')
+
+            
+def gen_raw_frames():
+    while True:
+        success, frame = camera.read()
+        if not success:
+            break
+
+        _, buffer = cv2.imencode('.jpg', frame)
         frame_bytes = buffer.tobytes()
 
         yield (b'--frame\r\n'
@@ -120,11 +138,40 @@ def gen_frames():
 
 @app.route('/video_feed')
 def video_feed():
-    return Response(gen_frames(), mimetype='multipart/x-mixed-replace; boundary=frame')
+    if mode == 'auto':
+        print("[VIDEO_FEED] Using AUTO mode stream (with detection)")
+        return Response(gen_frames(), mimetype='multipart/x-mixed-replace; boundary=frame')
+    else:
+        print("[VIDEO_FEED] Using MANUAL mode stream (raw camera)")
+        return Response(gen_raw_frames(), mimetype='multipart/x-mixed-replace; boundary=frame')
+
 
 @app.route('/stop')
 def stop():
     motor.stop()
+    return ('', 204)
+
+@app.route('/move')
+def move():
+    if mode != 'manual':
+        return ('Ignored: not in manual mode', 200)
+
+    direction = request.args.get('dir')
+    print(f"[MANUAL MODE] Direction command: {direction}")
+    
+    if direction == 'forward':
+        motor.forward()
+    elif direction == 'backward':
+        motor.backward()
+    elif direction == 'left':
+        motor.left()
+    elif direction == 'right':
+        motor.right()
+    elif direction == 'stop':
+        motor.stop()
+    else:
+        print("[WARNING] Unknown direction command.")
+
     return ('', 204)
 
 @app.route('/cleanup')

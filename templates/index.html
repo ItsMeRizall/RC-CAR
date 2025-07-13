@@ -201,6 +201,21 @@
 </head>
 <body>
     <h1>RC CAR CONTROL PANEL</h1>
+
+    <div class="control-panel">
+    <div style="margin-bottom: 20px;">
+        <label for="mode-select">Mode:</label>
+        <select id="mode-select" onchange="setMode(this.value)">
+            <option value="manual" selected>Manual</option>
+            <option value="auto">Auto (Deteksi)</option>
+        </select>
+
+        <label for="target-select" style="margin-left: 20px;">Target:</label>
+        <select id="target-select" onchange="setTarget(this.value)">
+            <option value="cat">Cat</option>
+            <option value="chicken">Chicken</option>
+        </select>
+    </div>
     
     <div class="video-container">
         <img src="{{ url_for('video_feed') }}" alt="RC Car Camera Feed">
@@ -287,6 +302,27 @@
                 button.classList.remove('active');
             });
         });
+
+    function setMode(mode) {
+        fetch(`/set_mode?mode=${mode}`)
+            .then(() => {
+                document.getElementById('status').textContent = 'Mode changed to ' + mode;
+                refreshVideoFeed();
+            });
+    }
+
+    function refreshVideoFeed() {
+        const img = document.querySelector('.video-container img');
+        const timestamp = new Date().getTime(); // Untuk memaksa browser refresh stream
+        img.src = `/video_feed?ts=${timestamp}`;
+    }
+
+    function setTarget(name) {
+        fetch(`/set_target_name?name=${name}`)
+            .then(() => {
+                document.getElementById('status').textContent = 'Target set to ' + name;
+            });
+    }
     </script>
 </body>
 </html>
